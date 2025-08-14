@@ -11,14 +11,15 @@ channels = {
     "VTV9 HD": "vtv9-hd",
 }
 
-m3u_content = "#EXTM3U\n"
+m3u_lines = ["#EXTM3U\n"]
 for name, slug in channels.items():
     try:
-        r = requests.get(f"https://vtvgo.vn/live/{slug}", timeout=10)
-        m3u8_url = re.search(r'https.*?\.m3u8', r.text).group()
-        m3u_content += f'#EXTINF:-1 group-title="VTV",{name}\n{m3u8_url}\n'
-    except:
-        pass
+        resp = requests.get(f"https://vtvgo.vn/live/{slug}", timeout=15)
+        match = re.search(r"https?://[^\"]+\.m3u8", resp.text)
+        if match:
+            m3u_lines.append(f"#EXTINF:-1,{name}\n{match.group()}\n")
+    except Exception as e:
+        print(f"Error fetching {name}: {e}")
 
 with open("playlist.m3u", "w", encoding="utf-8") as f:
-    f.write(m3u_content)
+    f.writelines(m3u_lines)
