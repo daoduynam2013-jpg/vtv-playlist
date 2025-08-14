@@ -1,0 +1,27 @@
+name: Update VTV Playlist
+
+on:
+  schedule:
+    - cron: "0 * * * *" # chạy mỗi 1 giờ
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: pip install requests
+      - name: Update playlist
+        run: python update.py
+      - name: Commit changes
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add playlist.m3u
+          git commit -m "Auto update playlist" || echo "No changes"
+          git push
